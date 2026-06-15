@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from datetime import datetime
 
 def render_current_weather(current_data):
@@ -66,7 +67,7 @@ def render_current_weather(current_data):
         )
 
 def process_and_graph_forecast(forecast_data):
-    """Generates a sophisticated dual-axis layout combining line charts and column matrices."""
+    """Generates an advanced multi-row analytical subplot interface to avoid layout dictionary bugs."""
     records = []
     for item in forecast_data["list"]:
         dt_obj = datetime.fromtimestamp(item["dt"])
@@ -83,72 +84,58 @@ def process_and_graph_forecast(forecast_data):
     df = pd.DataFrame(records)
     df_24h = df.head(8)
 
-    st.markdown("<br><h3 style='color: #ffffff; font-weight:600;'>📊 Dual-Axis Climate Correlation Analytics</h3>", unsafe_allow_html=True)
+    st.markdown("<br><h3 style='color: #ffffff; font-weight:600;'>📊 Environmental Analytics Subplot</h3>", unsafe_allow_html=True)
     
-    fig = go.Figure()
+    # Create 2 vertical stack subplots sharing the exact same X-axis timeline
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.12)
 
-    # Trace 1: Humidity (Bar matrix mapped to second Y-axis)
-    fig.add_trace(go.Bar(
-        x=df_24h["Time"],
-        y=df_24h["Humidity"],
-        name="Humidity (%)",
-        yaxis="y2",
-        marker=dict(color="rgba(56, 189, 248, 0.15)", line=dict(color="rgba(56, 189, 248, 0.4)", width=1)),
-        hovertemplate="Atmospheric Humidity: %{y}%<extra></extra>"
-    ))
+    # Row 1: Temperature Trace
+    fig.add_trace(
+        go.Scatter(
+            x=df_24h["Time"],
+            y=df_24h["Temperature"],
+            name="Temperature (°C)",
+            mode="lines+markers+text",
+            line=dict(color="#00ffcc", width=3, shape="spline"),
+            marker=dict(size=6, color="#0b0d12", line=dict(color="#00ffcc", width=2)),
+            text=[f"{round(val)}°C" for val in df_24h["Temperature"]],
+            textposition="top center",
+            textfont=dict(color="#ffffff", size=10, family="monospace"),
+            hovertemplate="Temp: %{y:.1f}°C<extra></extra>"
+        ),
+        row=1, col=1
+    )
 
-    # Trace 2: Temperature (Spline curve mapped to primary Y-axis)
-    fig.add_trace(go.Scatter(
-        x=df_24h["Time"],
-        y=df_24h["Temperature"],
-        name="Temperature (°C)",
-        yaxis="y",
-        mode="lines+markers+text",
-        line=dict(color="#00ffcc", width=3, shape="spline"),
-        marker=dict(size=8, color="#0b0d12", line=dict(color="#00ffcc", width=2)),
-        text=[f"{round(val)}°C" for val in df_24h["Temperature"]],
-        textposition="top center",
-        textfont=dict(color="#ffffff", size=10, family="monospace"),
-        hovertemplate="Thermal Reading: %{y:.1f}°C<extra></extra>"
-    ))
+    # Row 2: Humidity Trace
+    fig.add_trace(
+        go.Bar(
+            x=df_24h["Time"],
+            y=df_24h["Humidity"],
+            name="Humidity (%)",
+            marker=dict(color="rgba(56, 189, 248, 0.3)", line=dict(color="#38bdf8", width=1)),
+            hovertemplate="Humidity: %{y}%<extra></extra>"
+        ),
+        row=2, col=1
+    )
 
-    # Base Global Layout
+    # Clean layout styling properties
     fig.update_layout(
         template="plotly_dark",
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="#121620",
-        margin=dict(l=50, r=50, t=20, b=20),
-        height=340,
-        showlegend=True,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        hovermode="x unified",
-        xaxis=dict(showgrid=False, color="#9ca3af")
+        margin=dict(l=50, r=20, t=10, b=10),
+        height=400,
+        showlegend=False,
+        hovermode="x unified"
     )
 
-    # Explicit Primary Y-Axis Customization
-    fig.update_layout(
-        yaxis=dict(
-            title="Temperature (°C)",
-            titlefont=dict(color="#00ffcc", size=12),
-            tickfont=dict(color="#00ffcc"),
-            showgrid=True,
-            gridcolor="#1f2937",
-            zeroline=False
-        )
-    )
-
-    # Explicit Secondary Y-Axis Customization (Safe parsing structure)
-    fig.update_layout(
-        yaxis2=dict(
-            title="Humidity (%)",
-            titlefont=dict(color="#38bdf8", size=12),
-            tickfont=dict(color="#38bdf8"),
-            showgrid=False,
-            overlaying="y",
-            side="right",
-            range=[0, 100]
-        )
-    )
+    # Clean the axis grids up without dictionary nesting conflicts
+    fig.update_xaxes(showgrid=False, color="#9ca3af")
+    fig.update_yaxes(showgrid=True, gridcolor="#1f2937", zeroline=False, color="#9ca3af")
+    
+    # Specific Y labels per row
+    fig.update_yaxes(title_text="Temp (°C)", row=1, col=1)
+    fig.update_yaxes(title_text="Humidity (%)", row=2, col=1, range=[0, 100])
 
     st.plotly_chart(fig, use_container_width=True)
 
