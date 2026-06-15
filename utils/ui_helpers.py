@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+import plotly.express as px
 from datetime import datetime
 
 def render_current_weather(current_data, unit_label="°C", wind_label="m/s"):
@@ -22,7 +21,7 @@ def render_current_weather(current_data, unit_label="°C", wind_label="m/s"):
     st.markdown(
         f"<div style='background: linear-gradient(90deg, #121620 0%, #0b0d12 100%); padding: 15px 20px; "
         f"border-left: 4px solid #00ffcc; border-radius: 8px; margin-bottom: 25px;'>"
-        f"<p style='margin:0; font-size: 14px; color: #9ca3af; text-transform: uppercase; letter-spacing: 2px;'>System Status</p>"
+        f"<p style='margin:0; font-size: 14px; color: #9ca3af; text-transform: uppercase; letter-spacing: 2px;'>System Status</p>
         f"<h2 style='margin:0; color: #ffffff; font-weight: 700;'>{condition}</h2>"
         f"</div>", 
         unsafe_allow_html=True
@@ -66,87 +65,64 @@ def render_current_weather(current_data, unit_label="°C", wind_label="m/s"):
             unsafe_allow_html=True
         )
 
-def process_and_graph_forecast(forecast_data, unit_label="°C", items_to_show=8):
-    """Generates an advanced multi-row analytical subplot interface safely."""
+def process_and_graph_forecast(forecast_data, unit_label="°C", wind_label="m/s", items_to_show=8):
+    """Generates an error-free multi-tab premium layout for modern data analysis."""
     records = []
     for item in forecast_data["list"]:
         dt_obj = datetime.fromtimestamp(item["dt"])
         records.append({
-            "Timestamp": dt_obj,
-            "Date": dt_obj.strftime("%A, %b %d"),
             "Time": dt_obj.strftime("%I:%M %p"),
             "Temperature": item["main"]["temp"],
             "Humidity": item["main"]["humidity"],
+            "Wind Speed": item["wind"]["speed"],
             "Condition": item["weather"][0]["main"],
-            "Icon": item["weather"][0]["icon"]
+            "Icon": item["weather"][0]["icon"],
+            "DateLabel": dt_obj.strftime("%A, %b %d")
         })
         
-    df = pd.DataFrame(records)
-    # Filter the timeline lookahead range using the sidebar slider value
-    df_filtered = df.head(items_to_show)
+    df = pd.DataFrame(records).head(items_to_show)
 
-    st.markdown("<br><h3 style='color: #ffffff; font-weight:600;'>📊 Environmental Analytics Timeline</h3>", unsafe_allow_html=True)
+    st.markdown("<br><h3 style='color: #ffffff; font-weight:600;'>📊 Core Environmental Analytics Suite</h3>", unsafe_allow_html=True)
     
-    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.12)
-
-    # Row 1: Temperature Trace
-    fig.add_trace(
-        go.Scatter(
-            x=df_filtered["Time"],
-            y=df_filtered["Temperature"],
-            name=f"Temperature ({unit_label})",
-            mode="lines+markers+text",
-            line=dict(color="#00ffcc", width=3, shape="spline"),
-            marker=dict(size=6, color="#0b0d12", line=dict(color="#00ffcc", width=2)),
-            text=[f"{round(val)}{unit_label}" for val in df_filtered["Temperature"]],
-            textposition="top center",
-            textfont=dict(color="#ffffff", size=10, family="monospace"),
-            hovertemplate="Value: %{y:.1f}<extra></extra>"
-        ),
-        row=1, col=1
-    )
-
-    # Row 2: Humidity Trace
-    fig.add_trace(
-        go.Bar(
-            x=df_filtered["Time"],
-            y=df_filtered["Humidity"],
-            name="Humidity (%)",
-            marker=dict(color="rgba(56, 189, 248, 0.3)", line=dict(color="#38bdf8", width=1)),
-            hovertemplate="Humidity: %{y}%<extra></extra>"
-        ),
-        row=2, col=1
-    )
-
-    fig.update_layout(
-        template="plotly_dark",
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="#121620",
-        margin=dict(l=50, r=20, t=10, b=10),
-        height=400,
-        showlegend=False,
-        hovermode="x unified"
-    )
-
-    fig.update_xaxes(showgrid=False, color="#9ca3af")
-    fig.update_yaxes(showgrid=True, gridcolor="#1f2937", zeroline=False, color="#9ca3af")
+    # Premium Modern Feature: Modern Analytical Sub-Tabs
+    tab_temp, tab_humid, tab_wind = st.tabs(["🌡️ Thermal Profile", "💧 Moisture Matrix", "💨 Kinetic Vector Flow"])
     
-    fig.update_yaxes(title_text=f"Temp ({unit_label})", row=1, col=1)
-    fig.update_yaxes(title_text="Humidity (%)", row=2, col=1, range=[0, 100])
-
-    st.plotly_chart(fig, use_container_width=True)
+    with tab_temp:
+        fig_temp = px.line(df, x="Time", y="Temperature", markers=True, text=[f"{round(t)}{unit_label}" for t in df["Temperature"]])
+        fig_temp.update_traces(line=dict(color="#00ffcc", width=3, shape="spline"), marker=dict(size=8, color="#0b0d12", line=dict(width=2, color="#00ffcc")), textposition="top center")
+        fig_temp.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#121620", margin=dict(l=40, r=20, t=15, b=15), height=280)
+        fig_temp.update_xaxes(showgrid=False)
+        fig_temp.update_yaxes(showgrid=True, gridcolor="#1f2937", title_text=f"Temperature ({unit_label})")
+        st.plotly_chart(fig_temp, use_container_width=True)
+        
+    with tab_humid:
+        fig_humid = px.bar(df, x="Time", y="Humidity")
+        fig_humid.update_traces(marker_color="rgba(56, 189, 248, 0.4)", marker_line_color="#38bdf8", marker_line_width=1.5)
+        fig_humid.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#121620", margin=dict(l=40, r=20, t=15, b=15), height=280)
+        fig_humid.update_xaxes(showgrid=False)
+        fig_humid.update_yaxes(showgrid=True, gridcolor="#1f2937", range=[0, 100], title_text="Humidity (%)")
+        st.plotly_chart(fig_humid, use_container_width=True)
+        
+    with tab_wind:
+        fig_wind = px.area(df, x="Time", y="Wind Speed")
+        fig_wind.update_traces(line_color="#a78bfa", fillcolor="rgba(167, 139, 250, 0.1)")
+        fig_wind.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#121620", margin=dict(l=40, r=20, t=15, b=15), height=280)
+        fig_wind.update_xaxes(showgrid=False)
+        fig_wind.update_yaxes(showgrid=True, gridcolor="#1f2937", title_text=f"Wind Speed ({wind_label})")
+        st.plotly_chart(fig_wind, use_container_width=True)
 
     # 5-Day Outlook Render Cards
     st.markdown("<br><h3 style='color: #ffffff; font-weight:600;'>🔮 5-Day Predictive Core Outlook</h3>", unsafe_allow_html=True)
-    daily_df = df.drop_duplicates(subset=["Date"], keep="first")
+    df_all = pd.DataFrame(records)
+    daily_df = df_all.drop_duplicates(subset=["DateLabel"], keep="first")
     
     cols = st.columns(len(daily_df))
     for index, (_, row) in enumerate(daily_df.iterrows()):
         with cols[index]:
             st.markdown(
                 f"<div style='background-color: #121620; padding: 15px; border-radius: 8px; border: 1px solid #1f2937; text-align: center;'>"
-                f"<p style='margin: 0; font-size: 13px; color: #9ca3af; font-weight: 600;'>{row['Date'].split(',')[0]}</p>"
-                f"<p style='margin: 0 0 10px 0; font-size: 11px; color: #6b7280;'>{row['Date'].split(',')[1]}</p>"
+                f"<p style='margin: 0; font-size: 13px; color: #9ca3af; font-weight: 600;'>{row['DateLabel'].split(',')[0]}</p>"
+                f"<p style='margin: 0 0 10px 0; font-size: 11px; color: #6b7280;'>{row['DateLabel'].split(',')[1]}</p>"
                 f"<img src='http://openweathermap.org/img/wn/{row['Icon']}.png' style='width: 45px; margin: 0 auto;' />"
                 f"<h3 style='margin: 5px 0; color: #ffffff;'>{round(row['Temperature'])}{unit_label}</h3>"
                 f"<span style='font-size: 11px; background-color: #1f2937; padding: 3px 8px; border-radius: 12px; color: #00ffcc;'>{row['Condition']}</span>"

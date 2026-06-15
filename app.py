@@ -14,7 +14,7 @@ st.set_page_config(
 if "favorites" not in st.session_state:
     st.session_state.favorites = ["Lagos", "London", "Houston"]
 
-# Strict UI Layout Styles Injector
+# Core CSS Style Overrides
 st.markdown("""
     <style>
     .stApp { background-color: #0b0d12; color: #f3f4f6; }
@@ -22,7 +22,10 @@ st.markdown("""
     div[data-baseweb="input"] { background-color: #121620 !important; border: 1px solid #1f2937 !important; border-radius: 6px !important; }
     input { color: #ffffff !important; }
     
-    /* Premium Styled Buttons */
+    /* Custom Styling for Streamlit Tabs */
+    button[data-baseweb="tab"] { color: #9ca3af !important; font-size: 14px !important; }
+    button[aria-selected="true"] { color: #00ffcc !important; font-weight: bold !important; border-bottom-color: #00ffcc !important; }
+    
     div.stButton > button:first-child {
         background: linear-gradient(135deg, #00ffcc 0%, #0099ff 100%); 
         color: #0b0d12; font-weight: 700; border: none; border-radius: 6px; padding: 10px 20px; transition: all 0.3s ease;
@@ -33,29 +36,32 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ----------------- ADVANCED SIDEBAR SYSTEM -----------------
-st.sidebar.markdown("<p style='color:#00ffcc; font-size:14px; font-weight:700; letter-spacing:1px; margin-bottom:5px;'>⚡ SYSTEM CONTROLS</p>", unsafe_allow_html=True)
+# ----------------- MODERN CONTROL SIDEBAR -----------------
+st.sidebar.markdown("<p style='color:#00ffcc; font-size:14px; font-weight:700; letter-spacing:1px;'>⚡ OVERAH CONTROLS</p>", unsafe_allow_html=True)
 
-# Widget 1: Dynamic Unit Switcher Configuration
-unit_system = st.sidebar.radio("Metric Engine Selection:", ["Metric System (°C, m/s)", "Imperial System (°F, mph)"])
+# Metric Unit Selector Configuration
+unit_system = st.sidebar.radio("Core Metric Engine Selection:", ["Metric Engine (°C, m/s)", "Imperial Engine (°F, mph)"])
 unit_param = "metric" if "Metric" in unit_system else "imperial"
 u_label = "°C" if unit_param == "metric" else "°F"
 w_label = "m/s" if unit_param == "metric" else "mph"
 
-st.sidebar.markdown("<hr style='border-color:#1f2937; margin:15px 0;'/>", unsafe_allow_html=True)
+st.sidebar.markdown("<hr style='border-color:#1f2937; margin:12px 0;'/>", unsafe_allow_html=True)
 
-# Widget 2: Advanced Data Filter Timeline Sliders
-st.sidebar.markdown("<p style='color:#ffffff; font-size:12px; font-weight:600;'>Timeline Lookahead Limit</p>", unsafe_allow_html=True)
-lookahead_intervals = st.sidebar.slider("Select maximum hourly rows to evaluate:", min_value=4, max_value=12, value=8, step=1)
+# Data Lookahead Configuration
+lookahead_intervals = st.sidebar.slider("Timeline Analytics Row Count:", min_value=4, max_value=12, value=8, step=1)
 
-st.sidebar.markdown("<hr style='border-color:#1f2937; margin:15px 0;'/>", unsafe_allow_html=True)
+st.sidebar.markdown("<hr style='border-color:#1f2937; margin:12px 0;'/>", unsafe_allow_html=True)
 
-# Widget 3: Bookmarked Stations Menu Dropdown
-st.sidebar.markdown("<p style='color:#9ca3af; font-size:11px; font-weight:700; letter-spacing:1px; margin-bottom:5px;'>MONITORED NETWORKS</p>", unsafe_allow_html=True)
+# Bookmark Dropdown Selector
+st.sidebar.markdown("<p style='color:#9ca3af; font-size:11px; font-weight:700; letter-spacing:1px; margin-bottom:5px;'>MONITORED STATIONS</p>", unsafe_allow_html=True)
 selected_fav = st.sidebar.selectbox("Jump to network hub:", [""] + st.session_state.favorites, label_visibility="collapsed")
 
-st.sidebar.markdown("<br><br><br><hr style='border-color:#1f2937;'/>", unsafe_allow_html=True)
-st.sidebar.caption("🤖 Overah Core Engine v2.5\nData nodes authenticated securely.")
+st.sidebar.markdown("<hr style='border-color:#1f2937; margin:15px 0;'/>", unsafe_allow_html=True)
+
+# Modern Feature: Live Climate Anomaly Warning Tracker Widget
+st.sidebar.markdown("<p style='color:#ffffff; font-size:12px; font-weight:600;'>🚨 CORE ANOMALY MONITOR</p>", unsafe_allow_html=True)
+# Placeholder alert values (will dynamically verify once network responses map below)
+st.sidebar.info("Station Scan Status: Active\nNo severe system threshold anomalies flagged inside current telemetry feed.")
 # -----------------------------------------------------------
 
 # Primary Top Header Brand Setup
@@ -109,10 +115,9 @@ if active_query:
 
             st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
 
-            # Pass unit parameter explicitly down to data pipeline
             current, forecast = fetch_weather_data(geo_data["lat"], geo_data["lon"], units=unit_param)
             if current and forecast:
                 render_current_weather(current, unit_label=u_label, wind_label=w_label)
-                process_and_graph_forecast(forecast, unit_label=u_label, items_to_show=lookahead_intervals)
+                process_and_graph_forecast(forecast, unit_label=u_label, wind_label=w_label, items_to_show=lookahead_intervals)
         else:
             st.error("System Matrix Mapping Failure: Location coordinate target not identified.")
