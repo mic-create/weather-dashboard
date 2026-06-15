@@ -1,7 +1,9 @@
 import requests
 import streamlit as st
 
+# Direct access bypassing get methods to force a direct read from Streamlit Secrets
 API_KEY = st.secrets["OPENWEATHER_API_KEY"]
+
 GEO_URL = "http://api.openweathermap.org/geo/1.0/direct"
 WEATHER_URL = "https://api.openweathermap.org/data/2.5/forecast" 
 CURRENT_WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather"
@@ -14,7 +16,12 @@ def get_coordinates(city_name: str) -> dict:
         response.raise_for_status()
         data = response.json()
         if data:
-            return {"lat": data[0]["lat"], "lon": data[0]["lon"], "name": data[0]["name"], "country": data[0]["country"]}
+            return {
+                "lat": data[0]["lat"], 
+                "lon": data[0]["lon"], 
+                "name": data[0]["name"], 
+                "country": data[0]["country"]
+            }
         return None
     except Exception as e:
         st.error(f"Geocoding connection error: {e}")
