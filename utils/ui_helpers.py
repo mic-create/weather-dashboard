@@ -81,13 +81,13 @@ def process_and_graph_forecast(forecast_data):
         })
         
     df = pd.DataFrame(records)
-    df_24h = df.head(8)  # Next 24 hours timeline matrix
+    df_24h = df.head(8)
 
     st.markdown("<br><h3 style='color: #ffffff; font-weight:600;'>📊 Dual-Axis Climate Correlation Analytics</h3>", unsafe_allow_html=True)
     
     fig = go.Figure()
 
-    # Trace 1: Bar Matrix for Humidity (Mapped to the Right Y-Axis)
+    # Trace 1: Humidity (Bar matrix mapped to second Y-axis)
     fig.add_trace(go.Bar(
         x=df_24h["Time"],
         y=df_24h["Humidity"],
@@ -97,11 +97,12 @@ def process_and_graph_forecast(forecast_data):
         hovertemplate="Atmospheric Humidity: %{y}%<extra></extra>"
     ))
 
-    # Trace 2: Temperature Spline Curve (Mapped to the Left Y-Axis)
+    # Trace 2: Temperature (Spline curve mapped to primary Y-axis)
     fig.add_trace(go.Scatter(
         x=df_24h["Time"],
         y=df_24h["Temperature"],
         name="Temperature (°C)",
+        yaxis="y",
         mode="lines+markers+text",
         line=dict(color="#00ffcc", width=3, shape="spline"),
         marker=dict(size=8, color="#0b0d12", line=dict(color="#00ffcc", width=2)),
@@ -111,7 +112,7 @@ def process_and_graph_forecast(forecast_data):
         hovertemplate="Thermal Reading: %{y:.1f}°C<extra></extra>"
     ))
 
-    # Configuration for Dual-Axis Geometry Layout
+    # Base Global Layout
     fig.update_layout(
         template="plotly_dark",
         paper_bgcolor="rgba(0,0,0,0)",
@@ -121,10 +122,11 @@ def process_and_graph_forecast(forecast_data):
         showlegend=True,
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         hovermode="x unified",
-        xaxis=dict(
-            showgrid=False,
-            color="#9ca3af"
-        ),
+        xaxis=dict(showgrid=False, color="#9ca3af")
+    )
+
+    # Explicit Primary Y-Axis Customization
+    fig.update_layout(
         yaxis=dict(
             title="Temperature (°C)",
             titlefont=dict(color="#00ffcc", size=12),
@@ -132,7 +134,11 @@ def process_and_graph_forecast(forecast_data):
             showgrid=True,
             gridcolor="#1f2937",
             zeroline=False
-        ),
+        )
+    )
+
+    # Explicit Secondary Y-Axis Customization (Safe parsing structure)
+    fig.update_layout(
         yaxis2=dict(
             title="Humidity (%)",
             titlefont=dict(color="#38bdf8", size=12),
@@ -143,6 +149,7 @@ def process_and_graph_forecast(forecast_data):
             range=[0, 100]
         )
     )
+
     st.plotly_chart(fig, use_container_width=True)
 
     # 5-Day Outlook Render Cards
