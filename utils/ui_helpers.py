@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
 
@@ -58,7 +57,6 @@ def render_current_weather(current_data):
             unsafe_allow_html=True
         )
     with col4:
-        # Diagnostic Visual Icon Card
         st.markdown(
             f"<div style='background-color: #121620; padding: 12px; border-radius: 8px; border: 1px solid #1f2937; text-align: center; min-height: 128px;'>"
             f"<p style='color: #9ca3af; margin: 0; font-size: 13px; text-transform: uppercase;'>Visual Feed</p>"
@@ -68,14 +66,14 @@ def render_current_weather(current_data):
         )
 
 def process_and_graph_forecast(forecast_data):
-    """Generates elite interactive analytics trendlines and 5-day predictive tables."""
+    """Generates a sophisticated dual-axis layout combining line charts and column matrices."""
     records = []
     for item in forecast_data["list"]:
         dt_obj = datetime.fromtimestamp(item["dt"])
         records.append({
             "Timestamp": dt_obj,
             "Date": dt_obj.strftime("%A, %b %d"),
-            "Time": dt_obj.strftime("%H:%M"),
+            "Time": dt_obj.strftime("%I:%M %p"),
             "Temperature": item["main"]["temp"],
             "Humidity": item["main"]["humidity"],
             "Condition": item["weather"][0]["main"],
@@ -83,50 +81,71 @@ def process_and_graph_forecast(forecast_data):
         })
         
     df = pd.DataFrame(records)
-    # Take the next 24 hours of data points (8 intervals of 3 hours) for the timeline
-    df_24h = df.head(8)
+    df_24h = df.head(8)  # Next 24 hours timeline matrix
 
-    st.markdown("<br><h3 style='color: #ffffff; font-weight:600;'>📊 High-Fidelity Microclimate Timeline</h3>", unsafe_allow_html=True)
+    st.markdown("<br><h3 style='color: #ffffff; font-weight:600;'>📊 Dual-Axis Climate Correlation Analytics</h3>", unsafe_allow_html=True)
     
-    # Premium Styled Plotly Graph Object
     fig = go.Figure()
-    
-    # Temperature Area Trace
-    fig.add_trace(go.Scatter(
-        x=df_24h["Timestamp"],
-        y=df_24h["Temperature"],
-        mode="lines+markers",
-        name="Temperature (°C)",
-        line=dict(color="#00ffcc", width=3, shape="spline"),
-        marker=dict(size=8, color="#0b0d12", line=dict(color="#00ffcc", width=2)),
-        hovertemplate="<b>%{x|%I:%M %p}</b><br>Thermal Metric: %{y:.1f}°C<extra></extra>"
+
+    # Trace 1: Bar Matrix for Humidity (Mapped to the Right Y-Axis)
+    fig.add_trace(go.Bar(
+        x=df_24h["Time"],
+        y=df_24h["Humidity"],
+        name="Humidity (%)",
+        yaxis="y2",
+        marker=dict(color="rgba(56, 189, 248, 0.15)", line=dict(color="rgba(56, 189, 248, 0.4)", width=1)),
+        hovertemplate="Atmospheric Humidity: %{y}%<extra></extra>"
     ))
 
-    # Polished Graph Formatting Overrides
+    # Trace 2: Temperature Spline Curve (Mapped to the Left Y-Axis)
+    fig.add_trace(go.Scatter(
+        x=df_24h["Time"],
+        y=df_24h["Temperature"],
+        name="Temperature (°C)",
+        mode="lines+markers+text",
+        line=dict(color="#00ffcc", width=3, shape="spline"),
+        marker=dict(size=8, color="#0b0d12", line=dict(color="#00ffcc", width=2)),
+        text=[f"{round(val)}°C" for val in df_24h["Temperature"]],
+        textposition="top center",
+        textfont=dict(color="#ffffff", size=10, family="monospace"),
+        hovertemplate="Thermal Reading: %{y:.1f}°C<extra></extra>"
+    ))
+
+    # Configuration for Dual-Axis Geometry Layout
     fig.update_layout(
         template="plotly_dark",
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="#121620",
-        margin=dict(l=40, r=20, t=10, b=10),
-        height=320,
+        margin=dict(l=50, r=50, t=20, b=20),
+        height=340,
+        showlegend=True,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         hovermode="x unified",
         xaxis=dict(
-            showgrid=True,
-            gridcolor="#1f2937",
-            tickformat="%I:%M %p",
+            showgrid=False,
             color="#9ca3af"
         ),
         yaxis=dict(
+            title="Temperature (°C)",
+            titlefont=dict(color="#00ffcc", size=12),
+            tickfont=dict(color="#00ffcc"),
             showgrid=True,
             gridcolor="#1f2937",
-            title="Degrees Celsius",
-            titlefont=dict(color="#9ca3af", size=11),
-            color="#9ca3af"
+            zeroline=False
+        ),
+        yaxis2=dict(
+            title="Humidity (%)",
+            titlefont=dict(color="#38bdf8", size=12),
+            tickfont=dict(color="#38bdf8"),
+            showgrid=False,
+            overlaying="y",
+            side="right",
+            range=[0, 100]
         )
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    # Day-By-Day Condition Grid Layout
+    # 5-Day Outlook Render Cards
     st.markdown("<br><h3 style='color: #ffffff; font-weight:600;'>🔮 5-Day Predictive Core Outlook</h3>", unsafe_allow_html=True)
     daily_df = df.drop_duplicates(subset=["Date"], keep="first")
     
