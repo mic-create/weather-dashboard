@@ -73,9 +73,9 @@ with header_logo_col:
 
 with header_text_col:
     st.markdown(
-        "<h1 style='margin:0; padding-top:4px; font-weight:800; font-family: system-ui; letter-spacing:-0.5px;'> "
-        "OVERAH <span style='color:#00ffcc; font-weight:300;'>INTELLIGENCE</span> "
-        "<span style='font-size:14px; font-weight:400; color:#4b5563; vertical-align:middle; margin-left:10px;'>DECISION SUPPORT SYSTEM v3.0</span>"
+        "<h1 style='margin:0; padding-top:4px; font-weight:800; font-family: system-ui; letter-spacing:-0.5px; color:#ffffff;'>"
+        "OVERAH <span style='color:#0055ff; font-weight:900;'>CORE</span> "
+        "<span style='font-size:14px; font-weight:400; color:#4b5563; vertical-align:middle; margin-left:10px;'>ENVIRONMENTAL DECISION SUPPORT SYSTEM v3.0</span>"
         "</h1>", 
         unsafe_allow_html=True
     )
