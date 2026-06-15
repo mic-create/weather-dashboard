@@ -17,11 +17,11 @@ def render_current_weather(current_data, unit_label="°C", wind_label="m/s"):
     icon_code = weather["icon"]
     icon_url = f"http://openweathermap.org/img/wn/{icon_code}@2x.png"
 
-    # Topline Condition Banner
+    # Topline Condition Banner (Fixed string quotation syntax error here)
     st.markdown(
         f"<div style='background: linear-gradient(90deg, #121620 0%, #0b0d12 100%); padding: 15px 20px; "
         f"border-left: 4px solid #00ffcc; border-radius: 8px; margin-bottom: 25px;'>"
-        f"<p style='margin:0; font-size: 14px; color: #9ca3af; text-transform: uppercase; letter-spacing: 2px;'>System Status</p>
+        f"<p style='margin:0; font-size: 14px; color: #9ca3af; text-transform: uppercase; letter-spacing: 2px;'>System Status</p>"
         f"<h2 style='margin:0; color: #ffffff; font-weight: 700;'>{condition}</h2>"
         f"</div>", 
         unsafe_allow_html=True
@@ -31,7 +31,7 @@ def render_current_weather(current_data, unit_label="°C", wind_label="m/s"):
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.markdown(
-            f"<div style='background-color: #121620; padding: 20px; border-radius: 8px; border: 1px solid #1f2937; text-align: center;'>"
+            f"<div style='background-color: #121620; padding: 20px; border-radius: 8px; border: 1px solid #1f2937; text-align: center;'> "
             f"<p style='color: #9ca3af; margin: 0; font-size: 13px; text-transform: uppercase;'>Thermal Core</p>"
             f"<h1 style='color: #00ffcc; margin: 10px 0; font-family: monospace;'>{round(temp)}{unit_label}</h1>"
             f"<p style='color: #6b7280; margin: 0; font-size: 12px;'>Feels like: {round(feels_like)}{unit_label}</p>"
@@ -40,7 +40,7 @@ def render_current_weather(current_data, unit_label="°C", wind_label="m/s"):
         )
     with col2:
         st.markdown(
-            f"<div style='background-color: #121620; padding: 20px; border-radius: 8px; border: 1px solid #1f2937; text-align: center;'>"
+            f"<div style='background-color: #121620; padding: 20px; border-radius: 8px; border: 1px solid #1f2937; text-align: center;'> "
             f"<p style='color: #9ca3af; margin: 0; font-size: 13px; text-transform: uppercase;'>Atmospheric Moisture</p>"
             f"<h1 style='color: #38bdf8; margin: 10px 0; font-family: monospace;'>{humidity}%</h1>"
             f"<p style='color: #6b7280; margin: 0; font-size: 12px;'>Condensation Risk: Low</p>"
@@ -49,7 +49,7 @@ def render_current_weather(current_data, unit_label="°C", wind_label="m/s"):
         )
     with col3:
         st.markdown(
-            f"<div style='background-color: #121620; padding: 20px; border-radius: 8px; border: 1px solid #1f2937; text-align: center;'>"
+            f"<div style='background-color: #121620; padding: 20px; border-radius: 8px; border: 1px solid #1f2937; text-align: center;'> "
             f"<p style='color: #9ca3af; margin: 0; font-size: 13px; text-transform: uppercase;'>Vector Wind Speed</p>"
             f"<h1 style='color: #a78bfa; margin: 10px 0; font-family: monospace;'>{wind_speed} <span style='font-size:14px;'>{wind_label}</span></h1>"
             f"<p style='color: #6b7280; margin: 0; font-size: 12px;'>Directional Vector Flow</p>"
@@ -84,7 +84,7 @@ def process_and_graph_forecast(forecast_data, unit_label="°C", wind_label="m/s"
 
     st.markdown("<br><h3 style='color: #ffffff; font-weight:600;'>📊 Core Environmental Analytics Suite</h3>", unsafe_allow_html=True)
     
-    # Premium Modern Feature: Modern Analytical Sub-Tabs
+    # Modern Analytical Sub-Tabs
     tab_temp, tab_humid, tab_wind = st.tabs(["🌡️ Thermal Profile", "💧 Moisture Matrix", "💨 Kinetic Vector Flow"])
     
     with tab_temp:
