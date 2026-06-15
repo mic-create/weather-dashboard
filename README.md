@@ -15,5 +15,6 @@ Ensure Python version **3.9 or higher** is installed on your local runtime devic
    ```bash
    git clone https://github.com/mic-create/weather-dashboard
    cd weather-dashboard
+   python -m venv venv
    pip install -r requirements.txt
    streamlit run app.py
