@@ -5,7 +5,7 @@ from utils.ui_helpers import render_current_weather, process_and_graph_forecast
 
 # Page Configuration Setup
 st.set_page_config(
-    page_title="Overah Core | Climate Suite", 
+    page_title="Overah Intelligence | Enterprise Climate Suite", 
     page_icon="⚡", 
     layout="wide",
     initial_sidebar_state="expanded"
@@ -22,7 +22,6 @@ st.markdown("""
     div[data-baseweb="input"] { background-color: #121620 !important; border: 1px solid #1f2937 !important; border-radius: 6px !important; }
     input { color: #ffffff !important; }
     
-    /* Custom Styling for Streamlit Tabs */
     button[data-baseweb="tab"] { color: #9ca3af !important; font-size: 14px !important; }
     button[aria-selected="true"] { color: #00ffcc !important; font-weight: bold !important; border-bottom-color: #00ffcc !important; }
     
@@ -36,8 +35,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ----------------- MODERN CONTROL SIDEBAR -----------------
-st.sidebar.markdown("<p style='color:#00ffcc; font-size:14px; font-weight:700; letter-spacing:1px;'>⚡ OVERAH CONTROLS</p>", unsafe_allow_html=True)
+# ----------------- ENTERPRISE CONTROL SIDEBAR -----------------
+st.sidebar.markdown("<p style='color:#00ffcc; font-size:14px; font-weight:700; letter-spacing:1px; margin-bottom:0;'>⚡ OVERAH CORE INTEL</p>", unsafe_allow_html=True)
+st.sidebar.caption("Commercial Telemetry Console")
+st.sidebar.markdown("<br>", unsafe_allow_html=True)
 
 # Metric Unit Selector Configuration
 unit_system = st.sidebar.radio("Core Metric Engine Selection:", ["Metric Engine (°C, m/s)", "Imperial Engine (°F, mph)"])
@@ -48,7 +49,7 @@ w_label = "m/s" if unit_param == "metric" else "mph"
 st.sidebar.markdown("<hr style='border-color:#1f2937; margin:12px 0;'/>", unsafe_allow_html=True)
 
 # Data Lookahead Configuration
-lookahead_intervals = st.sidebar.slider("Timeline Analytics Row Count:", min_value=4, max_value=12, value=8, step=1)
+lookahead_intervals = st.sidebar.slider("Timeline Evaluation Rows:", min_value=4, max_value=12, value=8, step=1)
 
 st.sidebar.markdown("<hr style='border-color:#1f2937; margin:12px 0;'/>", unsafe_allow_html=True)
 
@@ -56,12 +57,10 @@ st.sidebar.markdown("<hr style='border-color:#1f2937; margin:12px 0;'/>", unsafe
 st.sidebar.markdown("<p style='color:#9ca3af; font-size:11px; font-weight:700; letter-spacing:1px; margin-bottom:5px;'>MONITORED STATIONS</p>", unsafe_allow_html=True)
 selected_fav = st.sidebar.selectbox("Jump to network hub:", [""] + st.session_state.favorites, label_visibility="collapsed")
 
-st.sidebar.markdown("<hr style='border-color:#1f2937; margin:15px 0;'/>", unsafe_allow_html=True)
+st.sidebar.markdown("<hr style='border-color:#1f2937; margin:12px 0;'/>", unsafe_allow_html=True)
 
-# Modern Feature: Live Climate Anomaly Warning Tracker Widget
-st.sidebar.markdown("<p style='color:#ffffff; font-size:12px; font-weight:600;'>🚨 CORE ANOMALY MONITOR</p>", unsafe_allow_html=True)
-# Placeholder alert values (will dynamically verify once network responses map below)
-st.sidebar.info("Station Scan Status: Active\nNo severe system threshold anomalies flagged inside current telemetry feed.")
+# Enterprise Operational Safety Monitor Widget
+st.sidebar.markdown("<p style='color:#ffffff; font-size:12px; font-weight:600;'>🚨 CORE RISK MONITOR</p>", unsafe_allow_html=True)
 # -----------------------------------------------------------
 
 # Primary Top Header Brand Setup
@@ -74,9 +73,9 @@ with header_logo_col:
 
 with header_text_col:
     st.markdown(
-        "<h1 style='margin:0; padding-top:4px; font-weight:800; font-family: system-ui; letter-spacing:-0.5px;'>"
-        "OVERAH <span style='color:#00ffcc; font-weight:300;'>CORE</span> "
-        "<span style='font-size:16px; font-weight:300; color:#6b7280; vertical-align:middle; margin-left:10px;'>ENVIRONMENTAL INTELLIGENCE SYSTEM v2.5</span>"
+        "<h1 style='margin:0; padding-top:4px; font-weight:800; font-family: system-ui; letter-spacing:-0.5px;'> "
+        "OVERAH <span style='color:#00ffcc; font-weight:300;'>INTELLIGENCE</span> "
+        "<span style='font-size:14px; font-weight:400; color:#4b5563; vertical-align:middle; margin-left:10px;'>DECISION SUPPORT SYSTEM v3.0</span>"
         "</h1>", 
         unsafe_allow_html=True
     )
@@ -117,6 +116,15 @@ if active_query:
 
             current, forecast = fetch_weather_data(geo_data["lat"], geo_data["lon"], units=unit_param)
             if current and forecast:
+                # Dynamic Sidebar Injection for Risk Analysis
+                cur_wind = current["wind"]["speed"]
+                cur_temp = current["main"]["temp"]
+                
+                if cur_wind > 15 or cur_temp > 35 or cur_temp < 5:
+                    st.sidebar.error(f"CRITICAL HAZARD ASSIGNED\nHigh environmental disruption limits breached at tracking node.")
+                else:
+                    st.sidebar.success("STATION SCAN: STABLE\nNo business risk vectors flagged across local tracking grids.")
+                
                 render_current_weather(current, unit_label=u_label, wind_label=w_label)
                 process_and_graph_forecast(forecast, unit_label=u_label, wind_label=w_label, items_to_show=lookahead_intervals)
         else:
