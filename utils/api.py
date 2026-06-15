@@ -1,9 +1,8 @@
-import os
 import requests
 import streamlit as st
 
-# Retrieve the API key directly from Streamlit's native Secrets management
-API_KEY = st.secrets.get("OPENWEATHER_API_KEY") if "OPENWEATHER_API_KEY" in st.secrets else os.getenv("OPENWEATHER_API_KEY")
+# Direct access bypassing get methods to force a direct read
+API_KEY = st.secrets["OPENWEATHER_API_KEY"]
 
 GEO_URL = "http://api.openweathermap.org/geo/1.0/direct"
 WEATHER_URL = "https://api.openweathermap.org/data/2.5/forecast" 
