@@ -3,7 +3,7 @@ import os
 from utils.api import get_coordinates, fetch_weather_data
 from utils.ui_helpers import render_current_weather, process_and_graph_forecast
 
-# 1. Page Configuration Setup
+# Page Configuration Setup
 st.set_page_config(
     page_title="Overah Core | Climate Suite", 
     page_icon="⚡", 
@@ -14,20 +14,15 @@ st.set_page_config(
 if "favorites" not in st.session_state:
     st.session_state.favorites = ["Lagos", "London", "Houston"]
 
-# 2. Strict UI Layout Styles Injector (Matching Dark/Teal Brand)
+# Strict UI Layout Styles Injector
 st.markdown("""
     <style>
-    /* Premium Slate Matte Styling Layouts */
     .stApp { background-color: #0b0d12; color: #f3f4f6; }
-    
-    /* Clean Sidebar Separators */
     section[data-testid="stSidebar"] { background-color: #0e1118 !important; border-right: 1px solid #1f2937; }
-    
-    /* Input Form Accent Overrides */
     div[data-baseweb="input"] { background-color: #121620 !important; border: 1px solid #1f2937 !important; border-radius: 6px !important; }
     input { color: #ffffff !important; }
     
-    /* Interactive Premium Styled Button Components */
+    /* Premium Styled Buttons */
     div.stButton > button:first-child {
         background: linear-gradient(135deg, #00ffcc 0%, #0099ff 100%); 
         color: #0b0d12; font-weight: 700; border: none; border-radius: 6px; padding: 10px 20px; transition: all 0.3s ease;
@@ -38,10 +33,34 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Structural Brand Title Layout Header
+# ----------------- ADVANCED SIDEBAR SYSTEM -----------------
+st.sidebar.markdown("<p style='color:#00ffcc; font-size:14px; font-weight:700; letter-spacing:1px; margin-bottom:5px;'>⚡ SYSTEM CONTROLS</p>", unsafe_allow_html=True)
+
+# Widget 1: Dynamic Unit Switcher Configuration
+unit_system = st.sidebar.radio("Metric Engine Selection:", ["Metric System (°C, m/s)", "Imperial System (°F, mph)"])
+unit_param = "metric" if "Metric" in unit_system else "imperial"
+u_label = "°C" if unit_param == "metric" else "°F"
+w_label = "m/s" if unit_param == "metric" else "mph"
+
+st.sidebar.markdown("<hr style='border-color:#1f2937; margin:15px 0;'/>", unsafe_allow_html=True)
+
+# Widget 2: Advanced Data Filter Timeline Sliders
+st.sidebar.markdown("<p style='color:#ffffff; font-size:12px; font-weight:600;'>Timeline Lookahead Limit</p>", unsafe_allow_html=True)
+lookahead_intervals = st.sidebar.slider("Select maximum hourly rows to evaluate:", min_value=4, max_value=12, value=8, step=1)
+
+st.sidebar.markdown("<hr style='border-color:#1f2937; margin:15px 0;'/>", unsafe_allow_html=True)
+
+# Widget 3: Bookmarked Stations Menu Dropdown
+st.sidebar.markdown("<p style='color:#9ca3af; font-size:11px; font-weight:700; letter-spacing:1px; margin-bottom:5px;'>MONITORED NETWORKS</p>", unsafe_allow_html=True)
+selected_fav = st.sidebar.selectbox("Jump to network hub:", [""] + st.session_state.favorites, label_visibility="collapsed")
+
+st.sidebar.markdown("<br><br><br><hr style='border-color:#1f2937;'/>", unsafe_allow_html=True)
+st.sidebar.caption("🤖 Overah Core Engine v2.5\nData nodes authenticated securely.")
+# -----------------------------------------------------------
+
+# Primary Top Header Brand Setup
 header_logo_col, header_text_col = st.columns([1, 15])
 with header_logo_col:
-    # Use your matching green brand logo asset cleanly
     if os.path.exists("My Logo.png"):
         st.image("My Logo.png", width=65)
     else:
@@ -58,14 +77,7 @@ with header_text_col:
 
 st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
 
-# 4. Sidebar Station Tracking Layout Component
-st.sidebar.markdown("<p style='color:#00ffcc; font-size:11px; font-weight:700; letter-spacing:1px; margin-bottom:5px;'>MONITORED NODES</p>", unsafe_allow_html=True)
-selected_fav = st.sidebar.selectbox("Jump to pinned network hub:", [""] + st.session_state.favorites, label_visibility="collapsed")
-
-st.sidebar.markdown("<br><br><hr style='border-color:#1f2937;'/>", unsafe_allow_html=True)
-st.sidebar.caption("🔒 Secured Node Connection Active. All environmental inputs are calibrated automatically.")
-
-# 5. Location Search Bar Componentry
+# Target Tracking Input Box
 with st.container():
     col_input, col_btn = st.columns([5, 1])
     with col_input:
@@ -76,13 +88,11 @@ with st.container():
 
 active_query = city_input
 
-# 6. Main Visual Core Render Execution Data Pipeline
 if active_query:
     with st.spinner("Decoding telemetry metrics from atmospheric array..."):
         geo_data = get_coordinates(active_query)
         
         if geo_data:
-            # Layout Header for the Selected Monitoring Station
             col_title, col_fav_action = st.columns([4, 1])
             with col_title:
                 st.markdown(f"<h2 style='margin:0; font-weight:600;'>📍 Node: {geo_data['name']}, {geo_data['country']}</h2>", unsafe_allow_html=True)
@@ -99,10 +109,10 @@ if active_query:
 
             st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
 
-            # Core API calls and visual rendering sequence
-            current, forecast = fetch_weather_data(geo_data["lat"], geo_data["lon"])
+            # Pass unit parameter explicitly down to data pipeline
+            current, forecast = fetch_weather_data(geo_data["lat"], geo_data["lon"], units=unit_param)
             if current and forecast:
-                render_current_weather(current)
-                process_and_graph_forecast(forecast)
+                render_current_weather(current, unit_label=u_label, wind_label=w_label)
+                process_and_graph_forecast(forecast, unit_label=u_label, items_to_show=lookahead_intervals)
         else:
             st.error("System Matrix Mapping Failure: Location coordinate target not identified.")

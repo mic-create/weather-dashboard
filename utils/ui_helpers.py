@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from datetime import datetime
 
-def render_current_weather(current_data):
+def render_current_weather(current_data, unit_label="°C", wind_label="m/s"):
     """Renders sleek, premium telemetry panels for Overah Core."""
     main_metrics = current_data["main"]
     wind = current_data["wind"]
@@ -34,8 +34,8 @@ def render_current_weather(current_data):
         st.markdown(
             f"<div style='background-color: #121620; padding: 20px; border-radius: 8px; border: 1px solid #1f2937; text-align: center;'>"
             f"<p style='color: #9ca3af; margin: 0; font-size: 13px; text-transform: uppercase;'>Thermal Core</p>"
-            f"<h1 style='color: #00ffcc; margin: 10px 0; font-family: monospace;'>{round(temp)}°C</h1>"
-            f"<p style='color: #6b7280; margin: 0; font-size: 12px;'>Feels like: {round(feels_like)}°C</p>"
+            f"<h1 style='color: #00ffcc; margin: 10px 0; font-family: monospace;'>{round(temp)}{unit_label}</h1>"
+            f"<p style='color: #6b7280; margin: 0; font-size: 12px;'>Feels like: {round(feels_like)}{unit_label}</p>"
             f"</div>", 
             unsafe_allow_html=True
         )
@@ -52,7 +52,7 @@ def render_current_weather(current_data):
         st.markdown(
             f"<div style='background-color: #121620; padding: 20px; border-radius: 8px; border: 1px solid #1f2937; text-align: center;'>"
             f"<p style='color: #9ca3af; margin: 0; font-size: 13px; text-transform: uppercase;'>Vector Wind Speed</p>"
-            f"<h1 style='color: #a78bfa; margin: 10px 0; font-family: monospace;'>{wind_speed} <span style='font-size:16px;'>m/s</span></h1>"
+            f"<h1 style='color: #a78bfa; margin: 10px 0; font-family: monospace;'>{wind_speed} <span style='font-size:14px;'>{wind_label}</span></h1>"
             f"<p style='color: #6b7280; margin: 0; font-size: 12px;'>Directional Vector Flow</p>"
             f"</div>", 
             unsafe_allow_html=True
@@ -66,8 +66,8 @@ def render_current_weather(current_data):
             unsafe_allow_html=True
         )
 
-def process_and_graph_forecast(forecast_data):
-    """Generates an advanced multi-row analytical subplot interface to avoid layout dictionary bugs."""
+def process_and_graph_forecast(forecast_data, unit_label="°C", items_to_show=8):
+    """Generates an advanced multi-row analytical subplot interface safely."""
     records = []
     for item in forecast_data["list"]:
         dt_obj = datetime.fromtimestamp(item["dt"])
@@ -82,26 +82,26 @@ def process_and_graph_forecast(forecast_data):
         })
         
     df = pd.DataFrame(records)
-    df_24h = df.head(8)
+    # Filter the timeline lookahead range using the sidebar slider value
+    df_filtered = df.head(items_to_show)
 
-    st.markdown("<br><h3 style='color: #ffffff; font-weight:600;'>📊 Environmental Analytics Subplot</h3>", unsafe_allow_html=True)
+    st.markdown("<br><h3 style='color: #ffffff; font-weight:600;'>📊 Environmental Analytics Timeline</h3>", unsafe_allow_html=True)
     
-    # Create 2 vertical stack subplots sharing the exact same X-axis timeline
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.12)
 
     # Row 1: Temperature Trace
     fig.add_trace(
         go.Scatter(
-            x=df_24h["Time"],
-            y=df_24h["Temperature"],
-            name="Temperature (°C)",
+            x=df_filtered["Time"],
+            y=df_filtered["Temperature"],
+            name=f"Temperature ({unit_label})",
             mode="lines+markers+text",
             line=dict(color="#00ffcc", width=3, shape="spline"),
             marker=dict(size=6, color="#0b0d12", line=dict(color="#00ffcc", width=2)),
-            text=[f"{round(val)}°C" for val in df_24h["Temperature"]],
+            text=[f"{round(val)}{unit_label}" for val in df_filtered["Temperature"]],
             textposition="top center",
             textfont=dict(color="#ffffff", size=10, family="monospace"),
-            hovertemplate="Temp: %{y:.1f}°C<extra></extra>"
+            hovertemplate="Value: %{y:.1f}<extra></extra>"
         ),
         row=1, col=1
     )
@@ -109,8 +109,8 @@ def process_and_graph_forecast(forecast_data):
     # Row 2: Humidity Trace
     fig.add_trace(
         go.Bar(
-            x=df_24h["Time"],
-            y=df_24h["Humidity"],
+            x=df_filtered["Time"],
+            y=df_filtered["Humidity"],
             name="Humidity (%)",
             marker=dict(color="rgba(56, 189, 248, 0.3)", line=dict(color="#38bdf8", width=1)),
             hovertemplate="Humidity: %{y}%<extra></extra>"
@@ -118,7 +118,6 @@ def process_and_graph_forecast(forecast_data):
         row=2, col=1
     )
 
-    # Clean layout styling properties
     fig.update_layout(
         template="plotly_dark",
         paper_bgcolor="rgba(0,0,0,0)",
@@ -129,12 +128,10 @@ def process_and_graph_forecast(forecast_data):
         hovermode="x unified"
     )
 
-    # Clean the axis grids up without dictionary nesting conflicts
     fig.update_xaxes(showgrid=False, color="#9ca3af")
     fig.update_yaxes(showgrid=True, gridcolor="#1f2937", zeroline=False, color="#9ca3af")
     
-    # Specific Y labels per row
-    fig.update_yaxes(title_text="Temp (°C)", row=1, col=1)
+    fig.update_yaxes(title_text=f"Temp ({unit_label})", row=1, col=1)
     fig.update_yaxes(title_text="Humidity (%)", row=2, col=1, range=[0, 100])
 
     st.plotly_chart(fig, use_container_width=True)
@@ -151,7 +148,7 @@ def process_and_graph_forecast(forecast_data):
                 f"<p style='margin: 0; font-size: 13px; color: #9ca3af; font-weight: 600;'>{row['Date'].split(',')[0]}</p>"
                 f"<p style='margin: 0 0 10px 0; font-size: 11px; color: #6b7280;'>{row['Date'].split(',')[1]}</p>"
                 f"<img src='http://openweathermap.org/img/wn/{row['Icon']}.png' style='width: 45px; margin: 0 auto;' />"
-                f"<h3 style='margin: 5px 0; color: #ffffff;'>{round(row['Temperature'])}°C</h3>"
+                f"<h3 style='margin: 5px 0; color: #ffffff;'>{round(row['Temperature'])}{unit_label}</h3>"
                 f"<span style='font-size: 11px; background-color: #1f2937; padding: 3px 8px; border-radius: 12px; color: #00ffcc;'>{row['Condition']}</span>"
                 f"</div>", 
                 unsafe_allow_html=True
